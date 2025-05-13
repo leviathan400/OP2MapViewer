@@ -1,2 +1,7 @@
 # OP2MapViewer
-Outpost 2 map viewer. Simple app to load and view .map files; the tile data and cell types.
+
+![Screenshot](https://images.outpostuniverse.org/OP2MapViewer.png)
+
+## What is it?
+
+OP2MapViewer is a simple application for opening Outpost 2: Divided Destiny map files to view the tiles and cell types.
