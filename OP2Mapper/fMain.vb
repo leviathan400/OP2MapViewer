@@ -4,6 +4,7 @@ Imports System.Drawing.Imaging
 Imports System.Reflection
 Imports System.Diagnostics
 Imports System.Runtime.CompilerServices
+Imports System.Media
 Imports OP2UtilityDotNet
 Imports OP2UtilityDotNet.Bitmap
 Imports OP2UtilityDotNet.OP2Map
@@ -60,11 +61,6 @@ Public Class fMain
     Private lblToolStripMapName As New ToolStripStatusLabel()
     Private lblToolStripMapPath As New ToolStripStatusLabel()
     Private lblToolStripCoordinates As New ToolStripStatusLabel()
-
-    ' Undo/Redo stacks
-    Private undoStack As New Stack(Of Command)
-    Private redoStack As New Stack(Of Command)
-    Private isUndoRedo As Boolean = False ' Flag to prevent undo/redo operations from being added to the stack
 #End Region
 
 #Region "Enumerations"
@@ -143,8 +139,6 @@ Public Class fMain
         ' Add tileset info labels
         AddTilesetInfoLabels()
 
-        EditModeEnabled = False
-
         ' Check if OP2 path is set
         If String.IsNullOrEmpty(My.Settings.OP2Path) Then
             Debug.WriteLine("OP2Path not set. First Run.")
@@ -174,6 +168,9 @@ Public Class fMain
                 Debug.Write(" - File not found")
             End If
         End If
+
+        Dim player As New SoundPlayer(My.Resources.lab_2)
+        player.Play()
     End Sub
 
     ''' <summary>
@@ -781,8 +778,6 @@ Public Class fMain
             If btnCenterView IsNot Nothing Then
                 btnCenterView.Enabled = False
             End If
-
-            EditModeEnabled = False
 
             ' Refresh display
             FindControl("pnlMap").Invalidate()
@@ -1894,29 +1889,6 @@ Public Class fMain
 
             ' Check if coordinates are valid
             If mapX >= 0 AndAlso mapY >= 0 AndAlso mapX < currentMap.WidthInTiles() AndAlso mapY < currentMap.HeightInTiles() Then
-                ' Check if we're in edit mode
-                If EditModeEnabled = True Then
-                    ' Check if we need to switch to CellTypeOverlayAll mode for better editing visibility
-                    If currentRenderMode <> RenderMode.CellTypeOverlayAll Then
-                        ' Use the existing function to switch modes
-                        RenderModeCellTypeOverlayAll_Click(Nothing, Nothing)
-                    End If
-
-                    ' Save previous cell type
-                    Dim previousCellType As CellType = currentMap.GetCellType(mapX, mapY)
-
-                    ' Only create a command if the cell type is actually changing
-                    If previousCellType <> ActiveCellType Then
-                        ' Create and execute the command
-                        Dim command As New ChangeCellTypeCommand(currentMap, mapX, mapY, previousCellType, ActiveCellType)
-                        ExecuteCommand(command)
-
-                        ' Update the tile display (no need to regenerate the whole map)
-                        UpdateSingleTile(mapX, mapY)
-
-                        Debug.WriteLine("Cell Type Updated - " & ActiveCellType.ToString & " - " & mapX & "," & mapY)
-                    End If
-                End If
 
                 ' Set as current tile for display in property panel
                 currentTileX = mapX
@@ -2390,31 +2362,6 @@ Public Class fMain
             End Using
         End Using
         picTilePreview.Image = selectedTileImage
-    End Sub
-#End Region
-
-#Region "Command Pattern and Undo/Redo Support"
-    ''' <summary>
-    ''' Executes a command and adds it to the undo stack
-    ''' </summary>
-    ''' <param name="command">The command to execute</param>
-    Private Sub ExecuteCommand(command As Command)
-        ' If we're in the middle of an undo/redo operation, don't add to the stack
-        If isUndoRedo Then
-            command.Execute()
-            Return
-        End If
-
-        ' Execute the command
-        command.Execute()
-
-        ' Add to undo stack
-        undoStack.Push(command)
-
-        ' Clear redo stack when a new command is executed
-        redoStack.Clear()
-
-        Debug.WriteLine($"Command executed: {command.Description}")
     End Sub
 #End Region
 

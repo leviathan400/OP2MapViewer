@@ -154,13 +154,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lists.ico" />
-    <None Include="Resources\banner03_620x100.png" />
     <None Include="Resources\banner02_620x100.png" />
     <None Include="packages.config" />
     <None Include="Resources\dataverse.ico" />
     <None Include="Resources\lists.ico" />
-    <None Include="Resources\C__Users_User_Documents_WindowsIcons-main_Icons_applications.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\lab_2.WAV" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
